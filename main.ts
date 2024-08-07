@@ -93,8 +93,6 @@ export default class MyPlugin extends Plugin {
 			name: "Insert Repository Link",
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				new InputRepositoryLinkModal(this.app, (result) => {
-					// new Notice(`Hello, ${result}!`);
-
 					if (result.startsWith("https://github.com/")) {
 						// 使用正则表达式提取用户名和仓库名
 						const regex = /https:\/\/github\.com\/([^/]+)\/([^/]+)/;
@@ -108,17 +106,17 @@ export default class MyPlugin extends Plugin {
 								`Username: ${username}, Repository: ${repository}`
 							);
 
-							const finalLinkText = `- [$[${username}/${repository}](https://github.com/${username}/${repository}) ![](https://img.shields.io/github/stars/${username}/${repository}.svg) ![](https://img.shields.io/github/last-commit/${username}/${repository}.svg) `;
+							const finalLinkText = `- [${username}/${repository}](https://github.com/${username}/${repository}) ![](https://img.shields.io/github/stars/${username}/${repository}.svg) ![](https://img.shields.io/github/last-commit/${username}/${repository}.svg) `;
 
 							editor.replaceRange(
 								finalLinkText,
 								editor.getCursor()
 							);
 						} else {
-							console.log("Invalid GitHub URL");
+							new Notice(`Invalid GitHub URL: ${result}!`);
 						}
-
-						// editor.replaceRange(result, editor.getCursor());
+					} else {
+						new Notice(`Not GitHub URL: ${result}!`);
 					}
 				}).open();
 			},
@@ -207,6 +205,17 @@ class InputRepositoryLinkModal extends Modal {
 					this.onSubmit(this.result);
 				})
 		);
+
+		// 添加事件监听器以在按下回车键时触发提交
+		contentEl.addEventListener("keydown", (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault(); // 防止默认行为（如表单提交）
+				const submitButton = btnSubmit.controlEl.querySelector("button");
+				if (submitButton) {
+					submitButton.click(); // 触发提交按钮的点击事件
+				}
+			}
+		});
 	}
 
 	onClose() {
